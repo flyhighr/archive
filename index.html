@@ -17,6 +17,7 @@
             color: white;
             min-height: 100vh;
             padding: 1rem;
+            line-height: 1.5;
         }
 
         .container {
@@ -35,8 +36,18 @@
         .message {
             display: flex;
             gap: 0.75rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .message:hover {
+            background-color: #27272a;
+        }
+
+        .message.has-reply {
+            margin-top: 1rem;
         }
 
         .avatar {
@@ -67,13 +78,15 @@
 
         .message-content {
             flex: 1;
+            min-width: 0;
         }
 
         .message-header {
             display: flex;
-            align-items: center;
+            align-items: baseline;
             gap: 0.5rem;
             margin-bottom: 0.25rem;
+            flex-wrap: wrap;
         }
 
         .author {
@@ -81,21 +94,104 @@
             font-weight: 600;
         }
 
-        .timestamp {
-            color: #71717a;
+        .nickname {
+            color: #a1a1aa;
             font-size: 0.875rem;
         }
 
+        .timestamp {
+            color: #71717a;
+            font-size: 0.75rem;
+        }
+
+        .edited-badge {
+            color: #71717a;
+            font-size: 0.75rem;
+            font-style: italic;
+        }
+
         .text {
-            color: white;
+            color: #e4e4e7;
             white-space: pre-wrap;
             word-break: break-word;
+            font-size: 0.9375rem;
+        }
+
+        .reply-container {
+            margin-bottom: 0.5rem;
+        }
+
+        .reply-reference {
+            background-color: #27272a;
+            border-radius: 4px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            border-left: 3px solid #4b5563;
+            color: #a1a1aa;
+        }
+
+        .reply-author {
+            color: #e879f9;
+            font-weight: 500;
+        }
+
+        .reactions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .reaction {
+            background-color: #27272a;
+            border-radius: 1rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .reaction-count {
+            color: #a1a1aa;
+        }
+
+        .attachments {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .attachment {
+            background-color: #27272a;
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .attachment-icon {
+            margin-right: 0.5rem;
+        }
+
+        .attachment-name {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .attachment-size {
+            color: #71717a;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
         }
 
         .error {
             color: #ef4444;
             text-align: center;
             padding: 2rem;
+            background-color: #27272a;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -107,7 +203,35 @@
     <script>
         const app = document.getElementById('app');
         const loading = document.getElementById('loading');
-        const API_URL = 'https://api-v9ww.onrender.com';  // Update with your actual API URL
+        const API_URL = 'https://api-v9ww.onrender.com';
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+
+            return date.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
 
         async function fetchConversation() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -136,23 +260,70 @@
             
             const messagesHtml = conversation.messages
                 .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-                .map(message => `
-                    <div class="message">
-                        <div class="avatar">
-                            ${message.avatar_url 
-                                ? `<img src="${message.avatar_url}" alt="${message.author}'s avatar">` 
-                                : `<div class="avatar-placeholder">${message.author[0].toUpperCase()}</div>`
-                            }
-                        </div>
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="author">${escapeHtml(message.author)}</span>
-                                <span class="timestamp">${new Date(message.timestamp).toLocaleString()}</span>
+                .map(message => {
+                    const replyHtml = message.reply_to ? `
+                        <div class="reply-container">
+                            <div class="reply-reference">
+                                <span class="reply-author">${escapeHtml(message.reply_to.author)}</span>
+                                ${escapeHtml(message.reply_to.content)}
                             </div>
-                            <div class="text">${escapeHtml(message.content)}</div>
                         </div>
-                    </div>
-                `).join('');
+                    ` : '';
+
+                    const reactionsHtml = message.reactions?.length ? `
+                        <div class="reactions">
+                            ${message.reactions.map(reaction => `
+                                <div class="reaction">
+                                    <span class="reaction-emoji">${escapeHtml(reaction.emoji)}</span>
+                                    <span class="reaction-count">${reaction.count}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '';
+
+                    const attachmentsHtml = message.attachments?.length ? `
+                        <div class="attachments">
+                            ${message.attachments.map(attachment => `
+                                <div class="attachment">
+                                    <span class="attachment-icon">📎</span>
+                                    <a href="${escapeHtml(attachment.url)}" target="_blank" class="attachment-name">
+                                        ${escapeHtml(attachment.filename)}
+                                    </a>
+                                    <span class="attachment-size">${formatFileSize(attachment.size)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '';
+
+                    const nicknameHtml = message.author_nickname ? 
+                        `<span class="nickname">(${escapeHtml(message.author_nickname)})</span>` : '';
+
+                    const editedHtml = message.edited_timestamp ?
+                        `<span class="edited-badge">(edited)</span>` : '';
+
+                    return `
+                        <div class="message ${message.reply_to ? 'has-reply' : ''}">
+                            <div class="avatar">
+                                ${message.avatar_url 
+                                    ? `<img src="${escapeHtml(message.avatar_url)}" alt="${escapeHtml(message.author)}'s avatar">` 
+                                    : `<div class="avatar-placeholder">${escapeHtml(message.author[0].toUpperCase())}</div>`
+                                }
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="author">${escapeHtml(message.author)}</span>
+                                    ${nicknameHtml}
+                                    <span class="timestamp">${formatTimestamp(message.timestamp)}</span>
+                                    ${editedHtml}
+                                </div>
+                                ${replyHtml}
+                                <div class="text">${escapeHtml(message.content)}</div>
+                                ${attachmentsHtml}
+                                ${reactionsHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
             app.innerHTML = messagesHtml;
         }
