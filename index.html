@@ -8,18 +8,18 @@
         :root {
             --bg-primary: #18181b;
             --bg-secondary: #27272a;
-            --bg-hover: #323236;
+            --bg-hover: #2d2d30;
             --text-primary: #e4e4e7;
             --text-secondary: #a1a1aa;
             --text-muted: #71717a;
             --accent-primary: #e879f9;
             --accent-secondary: #4b5563;
             --link-color: #60a5fa;
-            --border-radius: 8px;
             --spacing-xs: 0.25rem;
             --spacing-sm: 0.5rem;
             --spacing-md: 0.75rem;
             --spacing-lg: 1rem;
+            --border-radius: 8px;
         }
 
         * {
@@ -38,11 +38,8 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-lg);
         }
 
         .loading {
@@ -56,39 +53,44 @@
 
         .loading::after {
             content: "";
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid var(--accent-primary);
-            border-right-color: transparent;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--text-muted);
+            border-top-color: var(--accent-primary);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .message-group {
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-sm);
-            border-radius: var(--border-radius);
-            transition: background-color 0.2s ease;
-        }
-
-        .message-group:hover {
-            background-color: var(--bg-hover);
-        }
-
         .message {
             display: flex;
             gap: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s ease;
             position: relative;
+        }
+
+        .message:hover {
+            background-color: var(--bg-hover);
         }
 
         .message.has-reply {
             margin-top: var(--spacing-lg);
+        }
+
+        .message.has-reply::before {
+            content: "";
+            position: absolute;
+            top: -16px;
+            left: 20px;
+            width: 2px;
+            height: 16px;
+            background-color: var(--accent-secondary);
         }
 
         .avatar {
@@ -118,8 +120,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background-color: var(--accent-secondary);
+            color: white;
             font-weight: bold;
-            text-transform: uppercase;
         }
 
         .message-content {
@@ -129,7 +132,7 @@
 
         .message-header {
             display: flex;
-            align-items: center;
+            align-items: baseline;
             gap: var(--spacing-sm);
             margin-bottom: var(--spacing-xs);
             flex-wrap: wrap;
@@ -138,11 +141,11 @@
         .author {
             color: var(--accent-primary);
             font-weight: 600;
-            transition: filter 0.2s ease;
+            text-decoration: none;
         }
 
         .author:hover {
-            filter: brightness(1.2);
+            text-decoration: underline;
         }
 
         .nickname {
@@ -169,40 +172,33 @@
         }
 
         .reply-container {
-            margin: var(--spacing-sm) 0;
+            margin-bottom: var(--spacing-sm);
             position: relative;
-        }
-
-        .reply-container::before {
-            content: "";
-            position: absolute;
-            left: -24px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: var(--accent-secondary);
-            border-radius: 2px;
         }
 
         .reply-reference {
             background-color: var(--bg-secondary);
             border-radius: var(--border-radius);
             padding: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
             font-size: 0.875rem;
-            border-left: 3px solid var(--accent-primary);
+            border-left: 3px solid var(--accent-secondary);
             color: var(--text-secondary);
-            transition: background-color 0.2s ease;
             cursor: pointer;
+            transition: background-color 0.2s ease, border-left-color 0.2s ease;
+            max-height: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .reply-reference:hover {
             background-color: var(--bg-hover);
+            border-left-color: var(--accent-primary);
         }
 
         .reply-author {
             color: var(--accent-primary);
             font-weight: 500;
-            margin-right: var(--spacing-xs);
         }
 
         .reactions {
@@ -220,7 +216,7 @@
             display: flex;
             align-items: center;
             gap: var(--spacing-xs);
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease, transform 0.2s ease;
             cursor: pointer;
         }
 
@@ -245,9 +241,9 @@
             border-radius: var(--border-radius);
             padding: var(--spacing-sm);
             font-size: 0.875rem;
+            transition: background-color 0.2s ease;
             display: flex;
             align-items: center;
-            transition: background-color 0.2s ease;
         }
 
         .attachment:hover {
@@ -256,24 +252,25 @@
 
         .attachment-icon {
             margin-right: var(--spacing-sm);
-            font-size: 1.25rem;
         }
 
         .attachment-name {
             color: var(--link-color);
             text-decoration: none;
-            transition: color 0.2s ease;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .attachment-name:hover {
-            color: var(--accent-primary);
             text-decoration: underline;
         }
 
         .attachment-size {
             color: var(--text-muted);
             font-size: 0.75rem;
-            margin-left: auto;
+            margin-left: var(--spacing-sm);
         }
 
         .error {
@@ -286,22 +283,17 @@
         }
 
         @media (max-width: 640px) {
-            .container {
+            body {
                 padding: var(--spacing-sm);
             }
 
             .message {
-                gap: var(--spacing-sm);
+                padding: var(--spacing-xs);
             }
 
             .avatar {
                 width: 32px;
                 height: 32px;
-            }
-
-            .message-header {
-                flex-direction: column;
-                align-items: flex-start;
             }
         }
     </style>
@@ -332,43 +324,32 @@
             const diffHours = Math.floor(diffMins / 60);
             const diffDays = Math.floor(diffHours / 24);
 
+            const timeString = date.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
             if (diffMins < 1) return 'Just now';
             if (diffMins < 60) return `${diffMins}m ago`;
             if (diffHours < 24) return `${diffHours}h ago`;
             if (diffDays < 7) return `${diffDays}d ago`;
 
-            return date.toLocaleDateString(undefined, {
+            return `${date.toLocaleDateString(undefined, {
                 year: 'numeric',
                 month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+                day: 'numeric'
+            })} at ${timeString}`;
         }
 
-        function groupMessagesByAuthorAndTime(messages) {
-            const groups = [];
-            let currentGroup = null;
-
-            messages.forEach(message => {
-                const shouldStartNewGroup = !currentGroup || 
-                    currentGroup.author !== message.author ||
-                    (new Date(message.timestamp) - new Date(currentGroup.lastTimestamp)) > 5 * 60 * 1000;
-
-                if (shouldStartNewGroup) {
-                    currentGroup = {
-                        author: message.author,
-                        messages: [],
-                        lastTimestamp: message.timestamp
-                    };
-                    groups.push(currentGroup);
-                }
-
-                currentGroup.messages.push(message);
-                currentGroup.lastTimestamp = message.timestamp;
-            });
-
-            return groups;
+        function scrollToMessage(messageId) {
+            const element = document.getElementById(`message-${messageId}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.style.backgroundColor = 'var(--bg-hover)';
+                setTimeout(() => {
+                    element.style.backgroundColor = '';
+                }, 2000);
+            }
         }
 
         async function fetchConversation() {
@@ -393,208 +374,252 @@
             }
         }
 
-        
+        function createMessageMap(messages) {
+            return messages.reduce((map, message) => {
+                map[message.id] = message;
+                return map;
+            }, {});
+        }
+
         function displayConversation(conversation) {
             loading.remove();
             
+            const messageMap = createMessageMap(conversation.messages);
             const sortedMessages = conversation.messages
                 .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            const messageGroups = groupMessagesByAuthorAndTime(sortedMessages);
-            
-            const groupsHtml = messageGroups.map(group => {
-                const messagesHtml = group.messages.map(message => {
-                    const replyHtml = message.reply_to ? `
-                        <div class="reply-container">
-                            <div class="reply-reference" data-message-id="${message.reply_to.id}" onclick="scrollToMessage('${message.reply_to.id}')">
-                                <span class="reply-author">${escapeHtml(message.reply_to.author)}</span>
-                                ${escapeHtml(truncateText(message.reply_to.content, 100))}
-                            </div>
-                        </div>
-                    ` : '';
 
-                    const reactionsHtml = message.reactions?.length ? `
-                        <div class="reactions">
-                            ${message.reactions.map(reaction => `
-                                <div class="reaction" title="${reaction.count} reactions">
-                                    <span class="reaction-emoji">${escapeHtml(reaction.emoji)}</span>
-                                    <span class="reaction-count">${reaction.count}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '';
-
-                    const attachmentsHtml = message.attachments?.length ? `
-                        <div class="attachments">
-                            ${message.attachments.map(attachment => `
-                                <div class="attachment">
-                                    <span class="attachment-icon">${getAttachmentIcon(attachment.filename)}</span>
-                                    <a href="${escapeHtml(attachment.url)}" target="_blank" class="attachment-name" 
-                                       title="Download ${escapeHtml(attachment.filename)}">
-                                        ${escapeHtml(truncateText(attachment.filename, 30))}
-                                    </a>
-                                    <span class="attachment-size">${formatFileSize(attachment.size)}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '';
-
-                    const timestampHtml = `
-                        <span class="timestamp" title="${new Date(message.timestamp).toLocaleString()}">
-                            ${formatTimestamp(message.timestamp)}
-                        </span>
-                    `;
-
-                    const editedHtml = message.edited_timestamp ?
-                        `<span class="edited-badge" title="Edited at ${formatTimestamp(message.edited_timestamp)}">(edited)</span>` : '';
-
-                    return `
-                        <div class="message ${message.reply_to ? 'has-reply' : ''}" id="message-${message.id}">
-                            <div class="message-content">
-                                ${replyHtml}
-                                <div class="text">${formatMessageContent(message.content)}</div>
-                                ${attachmentsHtml}
-                                ${reactionsHtml}
-                                <div class="message-footer">
-                                    ${timestampHtml}
-                                    ${editedHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                const nicknameHtml = group.messages[0].author_nickname ? 
-                    `<span class="nickname">(${escapeHtml(group.messages[0].author_nickname)})</span>` : '';
+            const messagesHtml = sortedMessages.map(message => {
+                const replyHtml = message.reply_to ? createReplyHtml(message.reply_to, messageMap) : '';
+                const reactionsHtml = createReactionsHtml(message.reactions);
+                const attachmentsHtml = createAttachmentsHtml(message.attachments);
+                const nicknameHtml = message.author_nickname ? 
+                    `<span class="nickname">(${escapeHtml(message.author_nickname)})</span>` : '';
+                const editedHtml = message.edited_timestamp ?
+                    `<span class="edited-badge">(edited)</span>` : '';
 
                 return `
-                    <div class="message-group">
-                        <div class="message">
-                            <div class="avatar">
-                                ${group.messages[0].avatar_url 
-                                    ? `<img src="${escapeHtml(group.messages[0].avatar_url)}" 
-                                           alt="${escapeHtml(group.messages[0].author)}'s avatar"
-                                           loading="lazy">` 
-                                    : `<div class="avatar-placeholder">${escapeHtml(group.messages[0].author[0])}</div>`
-                                }
+                    <div id="message-${message.id}" class="message ${message.reply_to ? 'has-reply' : ''}">
+                        <div class="avatar">
+                            ${message.avatar_url 
+                                ? `<img src="${escapeHtml(message.avatar_url)}" alt="${escapeHtml(message.author)}'s avatar" loading="lazy">` 
+                                : `<div class="avatar-placeholder">${escapeHtml(message.author[0].toUpperCase())}</div>`
+                            }
+                        </div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <a href="#" class="author">${escapeHtml(message.author)}</a>
+                                ${nicknameHtml}
+                                <span class="timestamp" title="${new Date(message.timestamp).toLocaleString()}">
+                                    ${formatTimestamp(message.timestamp)}
+                                </span>
+                                ${editedHtml}
                             </div>
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <span class="author">${escapeHtml(group.messages[0].author)}</span>
-                                    ${nicknameHtml}
-                                </div>
-                                <div class="messages">
-                                    ${messagesHtml}
-                                </div>
-                            </div>
+                            ${replyHtml}
+                            <div class="text">${formatMessageContent(message.content)}</div>
+                            ${attachmentsHtml}
+                            ${reactionsHtml}
                         </div>
                     </div>
                 `;
             }).join('');
 
-            app.innerHTML = groupsHtml;
-            setupMessageInteractions();
-        }
+            app.innerHTML = messagesHtml;
 
-        function truncateText(text, maxLength) {
-            if (!text) return '';
-            return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-        }
-
-        function formatMessageContent(content) {
-            if (!content) return '';
-            let formatted = escapeHtml(content);
-            
-            // Convert URLs to clickable links
-            formatted = formatted.replace(
-                /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g, 
-                '<a href="$1" target="_blank" rel="noopener noreferrer" class="message-link">$1</a>'
-            );
-
-            // Convert Discord markdown to HTML
-            formatted = formatted
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/~~(.*?)~~/g, '<del>$1</del>')
-                .replace(/`(.*?)`/g, '<code>$1</code>')
-                .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>');
-
-            return formatted;
-        }
-
-        function getAttachmentIcon(filename) {
-            const ext = filename.split('.').pop().toLowerCase();
-            const iconMap = {
-                pdf: '📄',
-                doc: '📝',
-                docx: '📝',
-                xls: '📊',
-                xlsx: '📊',
-                png: '🖼️',
-                jpg: '🖼️',
-                jpeg: '🖼️',
-                gif: '🖼️',
-                mp4: '🎥',
-                mov: '🎥',
-                mp3: '🎵',
-                wav: '🎵',
-                zip: '📦',
-                rar: '📦'
-            };
-            return iconMap[ext] || '📎';
-        }
-
-        function setupMessageInteractions() {
-            // Add click handlers for reply references
+            // Add click handlers for replies
             document.querySelectorAll('.reply-reference').forEach(ref => {
-                ref.addEventListener('click', () => {
-                    const messageId = ref.dataset.messageId;
+                ref.addEventListener('click', (e) => {
+                    const messageId = e.currentTarget.dataset.messageId;
                     scrollToMessage(messageId);
                 });
             });
-
-            // Add hover effects for timestamps
-            document.querySelectorAll('.timestamp').forEach(timestamp => {
-                timestamp.addEventListener('mouseover', () => {
-                    timestamp.textContent = new Date(timestamp.title).toLocaleString();
-                });
-                timestamp.addEventListener('mouseout', () => {
-                    timestamp.textContent = formatTimestamp(new Date(timestamp.title));
-                });
-            });
         }
 
-        function scrollToMessage(messageId) {
-            const message = document.getElementById(`message-${messageId}`);
-            if (message) {
-                message.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                message.style.backgroundColor = 'var(--bg-hover)';
-                setTimeout(() => {
-                    message.style.backgroundColor = '';
-                }, 2000);
-            }
-        }
-
-        function showError(message) {
-            loading.remove();
-            app.innerHTML = `
-                <div class="error">
-                    <h2>Error</h2>
-                    <p>${escapeHtml(message)}</p>
-                    <button onclick="location.reload()" class="retry-button">Retry</button>
+        function createReplyHtml(replyData, messageMap) {
+            const originalMessage = messageMap[replyData.id];
+            const replyContent = originalMessage ? originalMessage.content : replyData.content;
+            return `
+                <div class="reply-container">
+                    <div class="reply-reference" data-message-id="${replyData.id}">
+                        <span class="reply-author">${escapeHtml(replyData.author)}</span>
+                        ${escapeHtml(truncateText(replyContent, 100))}
+                    </div>
                 </div>
             `;
         }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function createReactionsHtml(reactions) {
+            if (!reactions?.length) return '';
+            return `
+                <div class="reactions">
+                    ${reactions.map(reaction => `
+                        <div class="reaction">
+                            <span class="reaction-emoji">${escapeHtml(reaction.emoji)}</span>
+                            <span class="reaction-count">${reaction.count}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
-        // Initialize the app
-        fetchConversation();
-    </script>
+        function createAttachmentsHtml(attachments) {
+        if (!attachments?.length) return '';
+        return `
+            <div class="attachments">
+                ${attachments.map(attachment => {
+                    const fileIcon = getFileIcon(attachment.filename);
+                    return `
+                        <div class="attachment">
+                            <span class="attachment-icon">${fileIcon}</span>
+                            <a href="${escapeHtml(attachment.url)}" 
+                               target="_blank" 
+                               class="attachment-name"
+                               rel="noopener noreferrer">
+                                ${escapeHtml(attachment.filename)}
+                            </a>
+                            <span class="attachment-size">${formatFileSize(attachment.size)}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    function getFileIcon(filename) {
+        const extension = filename.split('.').pop().toLowerCase();
+        const iconMap = {
+            'pdf': '📄',
+            'doc': '📝',
+            'docx': '📝',
+            'xls': '📊',
+            'xlsx': '📊',
+            'jpg': '🖼️',
+            'jpeg': '🖼️',
+            'png': '🖼️',
+            'gif': '🖼️',
+            'mp4': '🎥',
+            'mov': '🎥',
+            'mp3': '🎵',
+            'wav': '🎵',
+            'zip': '📦',
+            'rar': '📦',
+            'txt': '📝'
+        };
+        return iconMap[extension] || '📎';
+    }
+
+    function formatMessageContent(content) {
+        if (!content) return '';
+        
+        // Convert URLs to clickable links
+        content = content.replace(
+            /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g, 
+            '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-link">$1</a>'
+        );
+
+        // Convert Discord markdown to HTML
+        content = content
+            // Bold
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            // Italic
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            // Strikethrough
+            .replace(/~~(.*?)~~/g, '<del>$1</del>')
+            // Code blocks
+            .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, language, code) => `
+                <pre class="code-block${language ? ` language-${language}` : ''}">
+                    <code>${escapeHtml(code.trim())}</code>
+                </pre>
+            `)
+            // Inline code
+            .replace(/`(.*?)`/g, '<code class="inline-code">$1</code>')
+            // Line breaks
+            .replace(/\n/g, '<br>');
+
+        return content;
+    }
+
+    function truncateText(text, maxLength) {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
+        return text.substr(0, maxLength - 3) + '...';
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showError(message) {
+        loading.remove();
+        app.innerHTML = `
+            <div class="error">
+                <h3>Error</h3>
+                <p>${escapeHtml(message)}</p>
+                <button onclick="location.reload()" class="retry-button">
+                    Try Again
+                </button>
+            </div>
+        `;
+    }
+
+    // Add these styles to the existing stylesheet
+    const additionalStyles = `
+        .text-link {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        .text-link:hover {
+            text-decoration: underline;
+        }
+
+        .code-block {
+            background-color: var(--bg-secondary);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            margin: var(--spacing-sm) 0;
+            overflow-x: auto;
+        }
+
+        .inline-code {
+            background-color: var(--bg-secondary);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .retry-button {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background-color: var(--accent-primary);
+            border: none;
+            border-radius: var(--border-radius);
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .retry-button:hover {
+            opacity: 0.9;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    `;
+
+    // Create and append the additional styles
+    const styleElement = document.createElement('style');
+    styleElement.textContent = additionalStyles;
+    document.head.appendChild(styleElement);
+
+    // Initialize the conversation fetch
+    fetchConversation();
+</script>
 </body>
 </html>
