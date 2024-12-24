@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discord Conversation Viewer</title>
     <style>
+        :root {
+            --bg-primary: #18181b;
+            --bg-secondary: #27272a;
+            --bg-hover: #323236;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #e879f9;
+            --accent-secondary: #4b5563;
+            --link-color: #60a5fa;
+            --border-radius: 8px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 0.75rem;
+            --spacing-lg: 1rem;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,17 +29,20 @@
         }
 
         body {
-            background-color: #18181b;
+            background-color: var(--bg-primary);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            color: white;
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 1rem;
+            padding: var(--spacing-lg);
             line-height: 1.5;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
         }
 
         .loading {
@@ -31,23 +51,44 @@
             align-items: center;
             min-height: 100vh;
             font-size: 1.25rem;
+            gap: var(--spacing-md);
+        }
+
+        .loading::after {
+            content: "";
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid var(--accent-primary);
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .message-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s ease;
+        }
+
+        .message-group:hover {
+            background-color: var(--bg-hover);
         }
 
         .message {
             display: flex;
-            gap: 0.75rem;
-            margin-bottom: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
-        }
-
-        .message:hover {
-            background-color: #27272a;
+            gap: var(--spacing-md);
+            position: relative;
         }
 
         .message.has-reply {
-            margin-top: 1rem;
+            margin-top: var(--spacing-lg);
         }
 
         .avatar {
@@ -55,14 +96,20 @@
             height: 40px;
             border-radius: 50%;
             overflow: hidden;
-            background-color: #4b5563;
+            background-color: var(--accent-secondary);
             flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar img:hover {
+            transform: scale(1.1);
         }
 
         .avatar-placeholder {
@@ -71,9 +118,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #4b5563;
-            color: white;
             font-weight: bold;
+            text-transform: uppercase;
         }
 
         .message-content {
@@ -83,115 +129,180 @@
 
         .message-header {
             display: flex;
-            align-items: baseline;
-            gap: 0.5rem;
-            margin-bottom: 0.25rem;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xs);
             flex-wrap: wrap;
         }
 
         .author {
-            color: #e879f9;
+            color: var(--accent-primary);
             font-weight: 600;
+            transition: filter 0.2s ease;
+        }
+
+        .author:hover {
+            filter: brightness(1.2);
         }
 
         .nickname {
-            color: #a1a1aa;
+            color: var(--text-secondary);
             font-size: 0.875rem;
         }
 
         .timestamp {
-            color: #71717a;
+            color: var(--text-muted);
             font-size: 0.75rem;
         }
 
         .edited-badge {
-            color: #71717a;
+            color: var(--text-muted);
             font-size: 0.75rem;
             font-style: italic;
         }
 
         .text {
-            color: #e4e4e7;
+            color: var(--text-primary);
             white-space: pre-wrap;
             word-break: break-word;
             font-size: 0.9375rem;
         }
 
         .reply-container {
-            margin-bottom: 0.5rem;
+            margin: var(--spacing-sm) 0;
+            position: relative;
+        }
+
+        .reply-container::before {
+            content: "";
+            position: absolute;
+            left: -24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--accent-secondary);
+            border-radius: 2px;
         }
 
         .reply-reference {
-            background-color: #27272a;
-            border-radius: 4px;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-sm);
             font-size: 0.875rem;
-            border-left: 3px solid #4b5563;
-            color: #a1a1aa;
+            border-left: 3px solid var(--accent-primary);
+            color: var(--text-secondary);
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .reply-reference:hover {
+            background-color: var(--bg-hover);
         }
 
         .reply-author {
-            color: #e879f9;
+            color: var(--accent-primary);
             font-weight: 500;
+            margin-right: var(--spacing-xs);
         }
 
         .reactions {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
         }
 
         .reaction {
-            background-color: #27272a;
+            background-color: var(--bg-secondary);
             border-radius: 1rem;
-            padding: 0.25rem 0.5rem;
+            padding: var(--spacing-xs) var(--spacing-sm);
             font-size: 0.875rem;
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: var(--spacing-xs);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .reaction:hover {
+            background-color: var(--bg-hover);
+            transform: scale(1.05);
         }
 
         .reaction-count {
-            color: #a1a1aa;
+            color: var(--text-secondary);
         }
 
         .attachments {
-            margin-top: 0.5rem;
+            margin-top: var(--spacing-sm);
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: var(--spacing-sm);
         }
 
         .attachment {
-            background-color: #27272a;
-            border-radius: 4px;
-            padding: 0.5rem;
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-sm);
             font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .attachment:hover {
+            background-color: var(--bg-hover);
         }
 
         .attachment-icon {
-            margin-right: 0.5rem;
+            margin-right: var(--spacing-sm);
+            font-size: 1.25rem;
         }
 
         .attachment-name {
-            color: #60a5fa;
+            color: var(--link-color);
             text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .attachment-name:hover {
+            color: var(--accent-primary);
+            text-decoration: underline;
         }
 
         .attachment-size {
-            color: #71717a;
+            color: var(--text-muted);
             font-size: 0.75rem;
-            margin-left: 0.5rem;
+            margin-left: auto;
         }
 
         .error {
             color: #ef4444;
             text-align: center;
             padding: 2rem;
-            background-color: #27272a;
-            border-radius: 4px;
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: var(--spacing-sm);
+            }
+
+            .message {
+                gap: var(--spacing-sm);
+            }
+
+            .avatar {
+                width: 32px;
+                height: 32px;
+            }
+
+            .message-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -229,8 +340,35 @@
             return date.toLocaleDateString(undefined, {
                 year: 'numeric',
                 month: 'short',
-                day: 'numeric'
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
+        }
+
+        function groupMessagesByAuthorAndTime(messages) {
+            const groups = [];
+            let currentGroup = null;
+
+            messages.forEach(message => {
+                const shouldStartNewGroup = !currentGroup || 
+                    currentGroup.author !== message.author ||
+                    (new Date(message.timestamp) - new Date(currentGroup.lastTimestamp)) > 5 * 60 * 1000;
+
+                if (shouldStartNewGroup) {
+                    currentGroup = {
+                        author: message.author,
+                        messages: [],
+                        lastTimestamp: message.timestamp
+                    };
+                    groups.push(currentGroup);
+                }
+
+                currentGroup.messages.push(message);
+                currentGroup.lastTimestamp = message.timestamp;
+            });
+
+            return groups;
         }
 
         async function fetchConversation() {
@@ -255,17 +393,22 @@
             }
         }
 
+        
         function displayConversation(conversation) {
             loading.remove();
             
-            const messagesHtml = conversation.messages
-                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-                .map(message => {
+            const sortedMessages = conversation.messages
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            
+            const messageGroups = groupMessagesByAuthorAndTime(sortedMessages);
+            
+            const groupsHtml = messageGroups.map(group => {
+                const messagesHtml = group.messages.map(message => {
                     const replyHtml = message.reply_to ? `
                         <div class="reply-container">
-                            <div class="reply-reference">
+                            <div class="reply-reference" data-message-id="${message.reply_to.id}" onclick="scrollToMessage('${message.reply_to.id}')">
                                 <span class="reply-author">${escapeHtml(message.reply_to.author)}</span>
-                                ${escapeHtml(message.reply_to.content)}
+                                ${escapeHtml(truncateText(message.reply_to.content, 100))}
                             </div>
                         </div>
                     ` : '';
@@ -273,7 +416,7 @@
                     const reactionsHtml = message.reactions?.length ? `
                         <div class="reactions">
                             ${message.reactions.map(reaction => `
-                                <div class="reaction">
+                                <div class="reaction" title="${reaction.count} reactions">
                                     <span class="reaction-emoji">${escapeHtml(reaction.emoji)}</span>
                                     <span class="reaction-count">${reaction.count}</span>
                                 </div>
@@ -285,9 +428,10 @@
                         <div class="attachments">
                             ${message.attachments.map(attachment => `
                                 <div class="attachment">
-                                    <span class="attachment-icon">📎</span>
-                                    <a href="${escapeHtml(attachment.url)}" target="_blank" class="attachment-name">
-                                        ${escapeHtml(attachment.filename)}
+                                    <span class="attachment-icon">${getAttachmentIcon(attachment.filename)}</span>
+                                    <a href="${escapeHtml(attachment.url)}" target="_blank" class="attachment-name" 
+                                       title="Download ${escapeHtml(attachment.filename)}">
+                                        ${escapeHtml(truncateText(attachment.filename, 30))}
                                     </a>
                                     <span class="attachment-size">${formatFileSize(attachment.size)}</span>
                                 </div>
@@ -295,50 +439,161 @@
                         </div>
                     ` : '';
 
-                    const nicknameHtml = message.author_nickname ? 
-                        `<span class="nickname">(${escapeHtml(message.author_nickname)})</span>` : '';
+                    const timestampHtml = `
+                        <span class="timestamp" title="${new Date(message.timestamp).toLocaleString()}">
+                            ${formatTimestamp(message.timestamp)}
+                        </span>
+                    `;
 
                     const editedHtml = message.edited_timestamp ?
-                        `<span class="edited-badge">(edited)</span>` : '';
+                        `<span class="edited-badge" title="Edited at ${formatTimestamp(message.edited_timestamp)}">(edited)</span>` : '';
 
                     return `
-                        <div class="message ${message.reply_to ? 'has-reply' : ''}">
-                            <div class="avatar">
-                                ${message.avatar_url 
-                                    ? `<img src="${escapeHtml(message.avatar_url)}" alt="${escapeHtml(message.author)}'s avatar">` 
-                                    : `<div class="avatar-placeholder">${escapeHtml(message.author[0].toUpperCase())}</div>`
-                                }
-                            </div>
+                        <div class="message ${message.reply_to ? 'has-reply' : ''}" id="message-${message.id}">
                             <div class="message-content">
-                                <div class="message-header">
-                                    <span class="author">${escapeHtml(message.author)}</span>
-                                    ${nicknameHtml}
-                                    <span class="timestamp">${formatTimestamp(message.timestamp)}</span>
-                                    ${editedHtml}
-                                </div>
                                 ${replyHtml}
-                                <div class="text">${escapeHtml(message.content)}</div>
+                                <div class="text">${formatMessageContent(message.content)}</div>
                                 ${attachmentsHtml}
                                 ${reactionsHtml}
+                                <div class="message-footer">
+                                    ${timestampHtml}
+                                    ${editedHtml}
+                                </div>
                             </div>
                         </div>
                     `;
                 }).join('');
 
-            app.innerHTML = messagesHtml;
+                const nicknameHtml = group.messages[0].author_nickname ? 
+                    `<span class="nickname">(${escapeHtml(group.messages[0].author_nickname)})</span>` : '';
+
+                return `
+                    <div class="message-group">
+                        <div class="message">
+                            <div class="avatar">
+                                ${group.messages[0].avatar_url 
+                                    ? `<img src="${escapeHtml(group.messages[0].avatar_url)}" 
+                                           alt="${escapeHtml(group.messages[0].author)}'s avatar"
+                                           loading="lazy">` 
+                                    : `<div class="avatar-placeholder">${escapeHtml(group.messages[0].author[0])}</div>`
+                                }
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="author">${escapeHtml(group.messages[0].author)}</span>
+                                    ${nicknameHtml}
+                                </div>
+                                <div class="messages">
+                                    ${messagesHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            app.innerHTML = groupsHtml;
+            setupMessageInteractions();
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+        }
+
+        function formatMessageContent(content) {
+            if (!content) return '';
+            let formatted = escapeHtml(content);
+            
+            // Convert URLs to clickable links
+            formatted = formatted.replace(
+                /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g, 
+                '<a href="$1" target="_blank" rel="noopener noreferrer" class="message-link">$1</a>'
+            );
+
+            // Convert Discord markdown to HTML
+            formatted = formatted
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/~~(.*?)~~/g, '<del>$1</del>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>');
+
+            return formatted;
+        }
+
+        function getAttachmentIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const iconMap = {
+                pdf: '📄',
+                doc: '📝',
+                docx: '📝',
+                xls: '📊',
+                xlsx: '📊',
+                png: '🖼️',
+                jpg: '🖼️',
+                jpeg: '🖼️',
+                gif: '🖼️',
+                mp4: '🎥',
+                mov: '🎥',
+                mp3: '🎵',
+                wav: '🎵',
+                zip: '📦',
+                rar: '📦'
+            };
+            return iconMap[ext] || '📎';
+        }
+
+        function setupMessageInteractions() {
+            // Add click handlers for reply references
+            document.querySelectorAll('.reply-reference').forEach(ref => {
+                ref.addEventListener('click', () => {
+                    const messageId = ref.dataset.messageId;
+                    scrollToMessage(messageId);
+                });
+            });
+
+            // Add hover effects for timestamps
+            document.querySelectorAll('.timestamp').forEach(timestamp => {
+                timestamp.addEventListener('mouseover', () => {
+                    timestamp.textContent = new Date(timestamp.title).toLocaleString();
+                });
+                timestamp.addEventListener('mouseout', () => {
+                    timestamp.textContent = formatTimestamp(new Date(timestamp.title));
+                });
+            });
+        }
+
+        function scrollToMessage(messageId) {
+            const message = document.getElementById(`message-${messageId}`);
+            if (message) {
+                message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                message.style.backgroundColor = 'var(--bg-hover)';
+                setTimeout(() => {
+                    message.style.backgroundColor = '';
+                }, 2000);
+            }
         }
 
         function showError(message) {
             loading.remove();
-            app.innerHTML = `<div class="error">Error: ${escapeHtml(message)}</div>`;
+            app.innerHTML = `
+                <div class="error">
+                    <h2>Error</h2>
+                    <p>${escapeHtml(message)}</p>
+                    <button onclick="location.reload()" class="retry-button">Retry</button>
+                </div>
+            `;
         }
 
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
+        // Initialize the app
         fetchConversation();
     </script>
 </body>
