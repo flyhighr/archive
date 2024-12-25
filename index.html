@@ -296,13 +296,101 @@
                 height: 32px;
             }
         }
+
+        .attachments {
+            margin-top: var(--spacing-sm);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .attachment {
+            background-color: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-sm);
+            font-size: 0.875rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .attachment:not(.attachment-media) {
+            display: flex;
+            align-items: center;
+        }
+
+        .attachment-media {
+            padding: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background-color: transparent;
+        }
+
+        .attachment-media img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .attachment-media img:hover {
+            opacity: 0.9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: var(--spacing-lg);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: var(--spacing-lg);
+            right: var(--spacing-lg);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
     <div id="app" class="container">
         <div id="loading" class="loading">Loading conversation...</div>
     </div>
-
+    <div id="imageModal" class="modal">
+        <span class="modal-close">&times;</span>
+        <div class="modal-content">
+            <img src="" alt="Full size image">
+        </div>
+    </div>
     <script>
         const app = document.getElementById('app');
         const loading = document.getElementById('loading');
@@ -462,27 +550,39 @@
         }
 
         function createAttachmentsHtml(attachments) {
-        if (!attachments?.length) return '';
-        return `
-            <div class="attachments">
-                ${attachments.map(attachment => {
-                    const fileIcon = getFileIcon(attachment.filename);
-                    return `
-                        <div class="attachment">
-                            <span class="attachment-icon">${fileIcon}</span>
-                            <a href="${escapeHtml(attachment.url)}" 
-                               target="_blank" 
-                               class="attachment-name"
-                               rel="noopener noreferrer">
-                                ${escapeHtml(attachment.filename)}
-                            </a>
-                            <span class="attachment-size">${formatFileSize(attachment.size)}</span>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    }
+            if (!attachments?.length) return '';
+            return `
+                <div class="attachments">
+                    ${attachments.map(attachment => {
+                        const isImage = isImageFile(attachment.filename);
+                        if (isImage) {
+                            return `
+                                <div class="attachment attachment-media">
+                                    <img src="${escapeHtml(attachment.url)}" 
+                                         alt="${escapeHtml(attachment.filename)}"
+                                         loading="lazy"
+                                         onclick="openImageModal('${escapeHtml(attachment.url)}')">
+                                </div>
+                            `;
+                        }
+                        const fileIcon = getFileIcon(attachment.filename);
+                        return `
+                            <div class="attachment">
+                                <span class="attachment-icon">${fileIcon}</span>
+                                <a href="${escapeHtml(attachment.url)}" 
+                                   target="_blank" 
+                                   class="attachment-name"
+                                   rel="noopener noreferrer">
+                                    ${escapeHtml(attachment.filename)}
+                                </a>
+                                <span class="attachment-size">${formatFileSize(attachment.size)}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
 
     function getFileIcon(filename) {
         const extension = filename.split('.').pop().toLowerCase();
@@ -563,6 +663,43 @@
             </div>
         `;
     }
+
+    
+    function isImageFile(filename) {
+            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            const extension = filename.split('.').pop().toLowerCase();
+            return imageExtensions.includes(extension);
+        }
+
+        // Modal handling functions
+        function openImageModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = modal.querySelector('img');
+            modalImg.src = imageUrl;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal when clicking the close button or outside the image
+        document.querySelector('.modal-close').addEventListener('click', closeImageModal);
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeImageModal();
+            }
+        });
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal with escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeImageModal();
+            }
+        });
 
     // Add these styles to the existing stylesheet
     const additionalStyles = `
